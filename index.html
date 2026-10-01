@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f4f5f1" />
+  <meta name="description" content="用畫布排版資訊，為每個位置指定 AI 資料任務，並輸出統一 JSON。" />
+  <title>Frame Canvas — AI 資訊圖工作室</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="主要導覽">
+      <a class="brand" href="#top" aria-label="Frame Canvas 工作台">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span class="brand-copy"><strong>FRAME <span>CANVAS</span></strong><small>AI INFOGRAPHIC BUILDER</small></span>
+      </a>
+
+      <button class="new-project-button" id="newProjectBtn" type="button">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12" /></svg>
+        <span>建立新畫布</span>
+        <kbd>⌘ K</kbd>
+      </button>
+
+      <div class="sidebar-label">工作區</div>
+      <nav class="main-nav">
+        <button class="nav-item active" type="button" data-view="canvas" aria-current="page">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M6 7h8M6 10h5M6 13h7"/></svg><span>畫布編輯</span>
+        </button>
+        <button class="nav-item" type="button" data-view="brief">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3.5h7l3 3v10H5a1.5 1.5 0 0 1-1.5-1.5V5A1.5 1.5 0 0 1 5 3.5Z"/><path d="M12 3.8v3h3M7 10h6M7 13h6"/></svg><span>資料與 AI 規則</span>
+        </button>
+        <button class="nav-item" type="button" data-view="api">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 12.5 5.9 14a2.8 2.8 0 0 1-4-4l3.2-3.2a2.8 2.8 0 0 1 4 0M12.5 7.5 14 6a2.8 2.8 0 1 1 4 4l-3.2 3.2a2.8 2.8 0 0 1-4 0M7 13l6-6"/></svg><span>API 連線</span>
+        </button>
+        <button class="nav-item" type="button" data-view="json">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4H5.5A1.5 1.5 0 0 0 4 5.5v1.8c0 1-.5 1.7-1.5 2.2.9.4 1.5 1.1 1.5 2.1v1.9A1.5 1.5 0 0 0 5.5 15H7M13 4h1.5A1.5 1.5 0 0 1 16 5.5v1.8c0 1 .5 1.7 1.5 2.2-.9.4-1.5 1.1-1.5 2.1v1.9a1.5 1.5 0 0 1-1.5 1.5H13M8 7.2 6.5 10 8 12.8M12 7.2l1.5 2.8-1.5 2.8"/></svg><span>統一 JSON</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+      <div class="saved-head"><div><span class="sidebar-label">版型範本</span><small>在本機瀏覽器儲存</small></div><button class="save-template-icon" id="saveTemplateBtn" type="button" title="儲存目前畫布為範本" aria-label="儲存目前畫布為範本"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg></button></div>
+      <div class="preset-list">
+        <button class="preset-row" type="button" data-preset="editorial"><span class="preset-thumb preset-editorial"><i></i><i></i><i></i></span><span><strong>重點整理</strong><small>圖文・數據・插圖</small></span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg></button>
+        <button class="preset-row" type="button" data-preset="steps"><span class="preset-thumb preset-steps"><i></i><i></i><i></i></span><span><strong>步驟教學</strong><small>直式流程・逐步說明</small></span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg></button>
+        <button class="preset-row" type="button" data-preset="data"><span class="preset-thumb preset-data"><i></i><i></i><i></i></span><span><strong>數據快報</strong><small>數字・圖表・結論</small></span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg></button>
+      </div>
+      <div class="custom-template-wrap"><div class="custom-template-title">我的版型</div><div id="customTemplates" class="custom-template-list"><div class="no-templates">還沒有儲存的版型</div></div></div>
+
+      <div class="sidebar-bottom">
+        <div class="consistency-card"><div class="consistency-icon"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m10 2.5 6 2.4v4.5c0 3.6-2.5 6.4-6 8.1-3.5-1.7-6-4.5-6-8.1V4.9l6-2.4Z"/><path d="m7.3 9.8 1.8 1.8 3.7-3.8"/></svg></div><div><strong>版型與內容分開</strong><p>AI 可以填內容，不會移動你排好的位置。</p></div></div>
+        <div class="sidebar-footnote"><span class="status-dot"></span> 自動儲存在這部裝置</div>
+      </div>
+    </aside>
+
+    <main class="main-shell" id="top">
+      <header class="topbar">
+        <div class="breadcrumbs"><span>我的工作區</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg><strong>資訊圖畫布</strong></div>
+        <div class="topbar-actions"><div class="save-status" id="saveStatus"><span class="status-dot"></span><span>已儲存</span></div><button class="button button-outline button-small" id="importResponseTopBtn" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v8m0 0 3-3m-3 3-3-3M4.5 12.5v2.7c0 .7.6 1.3 1.3 1.3h8.4c.7 0 1.3-.6 1.3-1.3v-2.7"/></svg>貼上 AI 回覆</button><button class="button button-dark button-small" id="downloadJsonTopBtn" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3.5v8m0 0 3-3m-3 3-3-3M4.5 12v3.2c0 .7.6 1.3 1.3 1.3h8.4c.7 0 1.3-.6 1.3-1.3V12"/></svg>匯出 JSON</button></div>
+      </header>
+
+      <section class="project-bar"><div class="project-title-group"><div class="eyebrow"><span class="eyebrow-dot"></span> VISUAL CONTENT WORKSPACE</div><h1>把資訊，排成自己的<span>畫布。</span></h1><p>先決定每個位置放什麼，再指派 AI 使用資料、查找內容或生成圖像。</p></div><label class="project-name-wrap"><span>專案名稱</span><input id="projectName" type="text" maxlength="48" value="每日補水指南" aria-label="專案名稱"/><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.8 3.8 3.4 3.4M4 16l3.5-.7L16 6.8a1.8 1.8 0 0 0-2.5-2.5L5 12.8 4 16Z"/></svg></label></section>
+
+      <nav class="view-tabs" aria-label="編輯流程"><button type="button" class="view-tab active" data-view="canvas"><span>01</span>畫布排版</button><button type="button" class="view-tab" data-view="brief"><span>02</span>資料與 AI 規則</button><button type="button" class="view-tab" data-view="api"><span>03</span>我的 AI API</button><button type="button" class="view-tab" data-view="json"><span>04</span>統一格式輸出</button><div class="view-tab-spacer"></div><span class="version-tag"><i></i>FRAME SCHEMA V1</span></nav>
+
+      <section class="app-view canvas-view active" id="view-canvas">
+        <div class="workspace-grid">
+          <aside class="tool-panel panel-card" aria-label="畫布區塊工具箱">
+            <div class="panel-head"><div><span class="panel-overline">ADD TO CANVAS</span><h2>區塊工具箱</h2></div><span class="panel-head-icon"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg></span></div>
+            <p class="tool-help">點一下加入，或拖曳到畫布。</p>
+            <div class="tool-grid">
+              <button class="tool-tile" type="button" draggable="true" data-add-block="heading"><span class="tool-icon tool-heading-icon">T</span><strong>標題</strong><small>主題、章節</small></button>
+              <button class="tool-tile" type="button" draggable="true" data-add-block="text"><span class="tool-icon tool-text-icon"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 6h12M4 10h10M4 14h7"/></svg></span><strong>文字</strong><small>說明、摘要</small></button>
+              <button class="tool-tile" type="button" draggable="true" data-add-block="image"><span class="tool-icon tool-image-icon"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3.5" width="14" height="13" rx="2"/><circle cx="7.5" cy="8" r="1.3"/><path d="m4.5 14 4-3.7 2.5 2 2-1.8 2.5 2.7"/></svg></span><strong>圖片</strong><small>素材、插畫</small></button>
+              <button class="tool-tile" type="button" draggable="true" data-add-block="stat"><span class="tool-icon tool-stat-icon">#</span><strong>數據</strong><small>關鍵數字</small></button>
+              <button class="tool-tile" type="button" draggable="true" data-add-block="steps"><span class="tool-icon tool-steps-icon"><i>1</i><i>2</i><i>3</i></span><strong>步驟</strong><small>流程清單</small></button>
+              <button class="tool-tile" type="button" draggable="true" data-add-block="chart"><span class="tool-icon tool-chart-icon"><i></i><i></i><i></i><i></i></span><strong>圖表</strong><small>比較、趨勢</small></button>
+            </div>
+            <div class="panel-divider"></div>
+            <div class="subsection-head"><div><span class="panel-overline">START WITH A LAYOUT</span><h3>快速版型</h3></div></div>
+            <div class="layout-shortcuts"><button type="button" data-preset="editorial"><span class="layout-mini layout-mini-editorial"><i></i><i></i><i></i><i></i></span><span>重點整理</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg></button><button type="button" data-preset="steps"><span class="layout-mini layout-mini-steps"><i></i><i></i><i></i><i></i></span><span>步驟教學</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg></button><button type="button" data-preset="data"><span class="layout-mini layout-mini-data"><i></i><i></i><i></i><i></i></span><span>數據摘要</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg></button></div>
+            <div class="tool-panel-bottom"><button type="button" class="data-shortcut" data-view="brief"><span class="data-shortcut-icon"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4.5h12v11H4zM7 8h6M7 11h6"/></svg></span><span><strong>加入整體資料</strong><small>給每個 AI 任務的共同背景</small></span><svg class="shortcut-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg></button></div>
+          </aside>
+
+          <section class="canvas-column" aria-label="畫布">
+            <div class="canvas-toolbar panel-card"><div class="canvas-page-label"><span class="page-icon"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="2.8" width="12" height="14.4" rx="1.5"/><path d="M7 6h6M7 9h6M7 12h4"/></svg></span><span><strong>畫布 01</strong><small id="canvasBlockCount">7 個版位</small></span></div><div class="canvas-tool-separator"></div><label class="ratio-select-label"><span>比例</span><select id="ratioSelect" aria-label="畫布比例"><option value="4:5">4:5 直式貼文</option><option value="1:1">1:1 方形貼文</option><option value="9:16">9:16 限時動態</option></select></label><div class="canvas-toolbar-spacer"></div><div class="zoom-controls"><button type="button" id="zoomOutBtn" aria-label="縮小">−</button><span id="zoomValue">100%</span><button type="button" id="zoomInBtn" aria-label="放大">+</button><button type="button" id="fitCanvasBtn" class="fit-button" aria-label="適合畫布" title="適合畫布"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3.5H3.5V7M13 3.5h3.5V7M16.5 13v3.5H13M7 16.5H3.5V13"/></svg></button></div></div>
+            <div class="canvas-stage" id="canvasStage"><div class="canvas-stage-caption"><span>LIVE CANVAS</span><span id="canvasRatioBadge">4:5</span></div><div class="canvas-board theme-citrus art-editorial" id="canvasBoard" data-ratio="4:5" aria-label="資訊圖畫布，可拖曳排列區塊"></div><div class="canvas-stage-hint"><span class="hint-dot"></span> 拖曳版位調整位置・選取後編輯內容與 AI 任務</div></div>
+            <div class="canvas-footer"><span class="canvas-footer-note"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.7 12 7l4.7 2-4.7 2-2 4.8-2-4.8-4.7-2L8 7l2-4.3Z"/></svg> AI 只填內容，不改變你設定的畫布位置。</span><button type="button" class="add-block-footer" id="addBlockFooterBtn"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>新增版位</button></div>
+          </section>
+
+          <aside class="inspector-panel panel-card" aria-label="版位設定">
+            <div class="inspector-head"><div><span class="panel-overline">SLOT INSPECTOR</span><h2>版位設定</h2></div><span class="inspector-slot-count" id="inspectorSlotCount">01 / 07</span></div>
+            <div class="selected-block-meta" id="selectedBlockMeta"></div>
+            <div class="inspector-tabs" role="tablist" aria-label="版位設定分頁"><button class="inspector-tab active" type="button" data-inspector-tab="content">內容</button><button class="inspector-tab" type="button" data-inspector-tab="ai">AI 任務<span class="tab-ai-dot"></span></button><button class="inspector-tab" type="button" data-inspector-tab="style">樣式</button></div>
+            <div class="inspector-scroll" id="inspectorScroll">
+              <section class="inspector-page active" data-inspector-page="content"><div id="contentFields"></div></section>
+              <section class="inspector-page" data-inspector-page="ai"><div id="aiFields"></div></section>
+              <section class="inspector-page" data-inspector-page="style"><div id="styleFields"></div></section>
+            </div>
+            <div class="inspector-actions"><button type="button" id="duplicateBlockBtn" class="icon-text-button"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="7" y="7" width="9" height="10" rx="1.5"/><path d="M12 7V5.5A1.5 1.5 0 0 0 10.5 4h-6A1.5 1.5 0 0 0 3 5.5v8A1.5 1.5 0 0 0 4.5 15H7"/></svg>複製</button><button type="button" id="deleteBlockBtn" class="icon-text-button danger-text"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 6h12M8 6V4h4v2m-6 0 .7 10h6.6L14 6M8.5 9v4M11.5 9v4"/></svg>刪除版位</button></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="app-view brief-view" id="view-brief" hidden>
+        <div class="brief-page-head"><div><span class="panel-overline">PROJECT CONTEXT</span><h2>整理共用資料與 AI 規則</h2><p>這些背景會提供給每個版位的 AI 任務；個別版位的指示可在畫布右側設定。</p></div><div class="context-badge"><span></span>共同資料池</div></div>
+        <div class="brief-grid">
+          <section class="panel-card brief-card">
+            <div class="brief-section-head"><span class="brief-step">01</span><div><h3>這張圖要說什麼？</h3><p>先給 AI 專案主題和讀者背景。</p></div></div>
+            <div class="form-field"><label for="topicInput">主題 / 目標讀者</label><input id="topicInput" type="text" maxlength="120" placeholder="例如：給上班族的每日補水指南" /></div>
+            <div class="form-field"><label for="globalBriefInput">整體資料與背景</label><textarea id="globalBriefInput" rows="6" placeholder="貼上資料、文章摘要、品牌背景或你希望 AI 遵循的全域說明…"></textarea><div class="field-helper">可貼原始內容；有指定來源時，AI 應優先使用這裡提供的資料。</div></div>
+            <div class="form-field"><label for="sourceUrlsInput">參考網址 <span>每行一個</span></label><textarea id="sourceUrlsInput" class="urls-input" rows="4" placeholder="https://example.org/official-source"></textarea></div>
+          </section>
+          <section class="panel-card brief-card rules-card">
+            <div class="brief-section-head"><span class="brief-step brief-step-lilac">02</span><div><h3>統一 AI 輸出規則</h3><p>跨版位共用，確保整套圖卡一致。</p></div></div>
+            <div class="form-field"><label for="localeSelect">輸出語言</label><select id="localeSelect"><option value="zh-Hant">繁體中文（台灣／香港）</option><option value="en">English</option><option value="ja">日本語</option></select></div>
+            <label class="check-row"><input type="checkbox" id="citationsCheck" checked /><span class="check-ui"></span><span><strong>研究內容附上可查證來源</strong><small>AI 查找資料時回傳來源名稱與網址。</small></span></label>
+            <label class="check-row"><input type="checkbox" id="preserveFactsCheck" checked /><span class="check-ui"></span><span><strong>只使用可確認的事實</strong><small>不確定的內容標記待確認，不自行補數據。</small></span></label>
+            <label class="check-row"><input type="checkbox" id="keepLayoutCheck" checked /><span class="check-ui"></span><span><strong>鎖定版位與設計系統</strong><small>回覆不得改動版位 ID、位置、尺寸與色彩規範。</small></span></label>
+            <div class="research-callout"><span class="callout-icon">✳</span><p><strong>AI 研究怎麼運作？</strong> 每個版位可個別選擇「搜尋資料、整理提供內容、生成圖像」等任務。匯出後交給有搜尋／生圖能力的 AI，再貼回回覆即可填入對應位置。</p></div>
+          </section>
+        </div>
+        <div class="brief-bottom"><span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m10 2.7 2 4.3 4.7 2-4.7 2-2 4.8-2-4.8-4.7-2L8 7l2-4.3Z"/></svg>每個版位的資料指示可在「畫布編輯」中單獨設定</span><button class="button button-dark" type="button" data-view="canvas">返回畫布設定版位 <span>→</span></button></div>
+      </section>
+
+      <section class="app-view api-view" id="view-api" hidden>
+        <div class="api-page-head"><div><span class="panel-overline">BRING YOUR OWN MODEL</span><h2>連接你自己的 AI。</h2><p>輸入 API endpoint、認證方式與回覆格式，讓畫布直接送出任務並自動填回版位。</p></div><div class="api-connection-status" id="apiConnectionStatus"><i></i><span>尚未測試連線</span></div></div>
+        <div class="api-layout">
+          <section class="panel-card api-config-card">
+            <div class="api-card-head"><div class="api-card-icon"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 12.5 5.9 14a2.8 2.8 0 0 1-4-4l3.2-3.2a2.8 2.8 0 0 1 4 0M12.5 7.5 14 6a2.8 2.8 0 1 1 4 4l-3.2 3.2a2.8 2.8 0 0 1-4 0M7 13l6-6"/></svg></div><div><h3>API 呼叫設定</h3><p>設定只存在你的瀏覽器，請勿填入不信任的 endpoint。</p></div><select id="apiPresetSelect" class="preset-select" aria-label="API 設定範本"><option value="openai-compatible">OpenAI 相容 API</option><option value="custom">自訂 API</option></select></div>
+            <div class="api-form-grid">
+              <div class="form-field api-field-full"><label for="apiEndpointInput">API Endpoint URL</label><input id="apiEndpointInput" type="url" placeholder="https://api.example.com/v1/chat/completions" autocomplete="url"/><div class="field-helper">完整請求網址；需允許此網頁來源的 CORS 跨網域請求。</div></div>
+              <div class="form-field"><label for="apiModelInput">模型名稱</label><input id="apiModelInput" type="text" placeholder="例如：gpt-4.1-mini" autocomplete="off"/></div>
+              <div class="form-field"><label for="apiMethodSelect">HTTP Method</label><select id="apiMethodSelect"><option value="POST">POST</option><option value="PUT">PUT</option></select></div>
+              <div class="form-field api-field-full"><label for="apiKeyInput">API Key <span>不會寫入匯出的 JSON</span></label><div class="api-key-wrap"><input id="apiKeyInput" type="password" placeholder="貼上你自己的 API Key" autocomplete="new-password"/><button id="toggleApiKeyBtn" type="button" aria-label="顯示 API Key">顯示</button></div><label class="remember-key"><input id="rememberApiKeyCheck" type="checkbox"/><span>在此分頁工作階段暫存 Key（關閉分頁後清除）</span></label></div>
+              <div class="form-field api-field-full"><label for="apiHeadersInput">Request Headers <span>JSON，可使用 {{api_key}}</span></label><textarea id="apiHeadersInput" class="api-code-input" rows="4" spellcheck="false"></textarea></div>
+              <div class="form-field api-field-full"><div class="api-label-row"><label for="apiBodyInput">Request Body Template <span>JSON</span></label><button id="restoreApiTemplateBtn" class="link-button" type="button">還原 OpenAI 範本</button></div><textarea id="apiBodyInput" class="api-code-input body-template-input" rows="13" spellcheck="false"></textarea><div class="field-helper">可用變數：<code>{{model}}</code> <code>{{payload}}</code> <code>{{prompt}}</code> <code>{{system_prompt}}</code>。Body 必須是合法 JSON。</div></div>
+              <div class="form-field"><label for="apiResponsePathInput">回覆內容路徑 <span>dot path</span></label><input id="apiResponsePathInput" type="text" placeholder="choices.0.message.content" autocomplete="off"/><div class="field-helper">例如 OpenAI 相容回覆填 <code>choices.0.message.content</code>；留白會嘗試自動辨識。</div></div>
+              <div class="form-field"><label for="apiTimeoutInput">逾時秒數</label><input id="apiTimeoutInput" type="number" min="10" max="300" step="5"/><div class="field-helper">研究任務建議 60–120 秒。</div></div>
+            </div>
+            <div class="api-form-footer"><span class="api-save-note"><span class="status-dot"></span> Endpoint / body 會自動儲存；Key 不會存入專案。</span><button class="button button-outline" id="saveApiSettingsBtn" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h10l2 2v10H4zM7 4v5h6V4M7 16v-4h6v4"/></svg>儲存設定</button></div>
+          </section>
+          <aside class="api-help-column">
+            <section class="panel-card api-run-card"><div class="run-card-orb">✳</div><span class="panel-overline">READY TO RUN</span><h3>把任務送到你的 AI</h3><p>會一併送出畫布 JSON、共用資料，以及每個版位的任務說明。AI 回覆會依版位 ID 自動填回。</p><div class="run-summary"><span><strong id="apiPendingCount">0</strong><small>待執行任務</small></span><span><strong id="apiSlotCount">0</strong><small>畫布版位</small></span></div><button type="button" class="button button-dark full-button" id="callAiBtn"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13m0 0-4-4m4 4-4 4M10 3l1.2 3.2L14.5 7.5l-3.3 1.2L10 12l-1.2-3.3L5.5 7.5l3.3-1.3L10 3Z"/></svg>執行 AI 任務</button><div class="api-call-status" id="apiCallStatus" role="status"><i></i><span>設定完成後即可呼叫</span></div></section>
+            <section class="panel-card api-help-card"><span class="panel-overline">REQUEST VARIABLES</span><h3>可用的 Body 變數</h3><div class="variable-list"><div><code>{{model}}</code><span>模型欄位</span></div><div><code>{{payload}}</code><span>完整版型與資料 JSON</span></div><div><code>{{prompt}}</code><span>人類可讀的任務指令</span></div><div><code>{{system_prompt}}</code><span>嚴格回覆規則與鎖版契約</span></div><div><code>{{api_key}}</code><span>只可用於 Headers</span></div></div><div class="cors-warning"><span>!</span><p><strong>關於 CORS</strong> 瀏覽器會直接呼叫你設定的 API。若收到 Failed to fetch，請確認服務允許跨來源請求；此原型不會把 Key 傳到我們的伺服器。</p></div><div class="research-api-note"><span>⌕</span><p><strong>查找資料／生圖</strong> 需要 endpoint 支援網路搜尋或圖像生成工具；純文字模型只能依現有資料回覆。</p></div><div class="security-note"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="8" width="11" height="8.5" rx="1.5"/><path d="M7 8V5.8a3 3 0 0 1 6 0V8M10 11v2.5"/></svg><span>只對你信任的 API 網址送出 Key。使用中的 Key 只保存在記憶體；勾選後才暫存於分頁 sessionStorage。</span></div></section>
+            <button class="api-json-shortcut" type="button" data-view="json">先檢查統一 JSON <span>→</span></button>
+          </aside>
+        </div>
+      </section>
+
+      <section class="app-view json-view" id="view-json" hidden>
+        <div class="json-page-head"><div><span class="panel-overline">ONE FORMAT, EVERY SLOT</span><h2>統一格式，交給任何 AI。</h2><p>版位、資料來源任務、文字／圖像類型、視覺規範都在同一份 JSON 中。</p></div><div class="json-head-status"><span class="json-valid"><i></i>格式有效</span><span id="taskCountBadge">0 個 AI 任務</span></div></div>
+        <div class="json-layout">
+          <section class="panel-card json-editor-card"><div class="json-toolbar"><div class="json-file"><span class="json-file-icon">{ }</span><span><strong>frame-canvas.json</strong><small id="jsonFileMeta">FRAME CANVAS SCHEMA · V1</small></span></div><div class="json-toolbar-actions"><button type="button" class="text-button" id="copyJsonBtn"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="7" y="6" width="9" height="11" rx="1.5"/><path d="M12 6V4.5A1.5 1.5 0 0 0 10.5 3h-6A1.5 1.5 0 0 0 3 4.5v8A1.5 1.5 0 0 0 4.5 14H7"/></svg>複製 JSON</button><button type="button" class="text-button" id="downloadJsonBtn"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3.5v8m0 0 3-3m-3 3-3-3M4.5 12v3.2c0 .7.6 1.3 1.3 1.3h8.4c.7 0 1.3-.6 1.3-1.3V12"/></svg>下載</button></div></div><pre class="json-code"><code id="jsonOutput"></code></pre></section>
+          <aside class="json-side-column"><section class="panel-card ai-package-card"><div class="ai-package-icon">✳</div><span class="panel-overline">AI TASK PACKAGE</span><h3>包含可以執行的任務指示</h3><p>匯出的規格會告訴 AI：哪些版位要查資料、使用哪些來源、哪裡需要圖像，以及回覆時只能填內容、不能移動版位。</p><div class="package-stats"><span><strong id="pendingResearchCount">0</strong><small>待研究</small></span><span><strong id="pendingImageCount">0</strong><small>待生圖</small></span><span><strong id="slotTotalCount">0</strong><small>總版位</small></span></div><button type="button" class="button button-dark full-button" id="copyAiPromptBtn"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.5 11.7 8l5.8 2-5.8 2-1.7 5.5L8.3 12l-5.8-2 5.8-2L10 2.5Z"/></svg>複製 AI 執行指令</button><button type="button" class="button button-teal full-button" id="callAiFromJsonBtn"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13m0 0-4-4m4 4-4 4"/></svg>使用我的 API 執行</button><button type="button" class="button button-outline full-button" id="importResponseBtn"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v8m0 0 3-3m-3 3-3-3M4.5 12.5v2.7c0 .7.6 1.3 1.3 1.3h8.4c.7 0 1.3-.6 1.3-1.3v-2.7"/></svg>貼上 AI 回覆並填入版位</button><div class="ai-package-note"><span>i</span><p>可在「我的 AI API」直接呼叫；也可將 JSON／指令交給外部 AI，再貼回回覆。</p></div></section><section class="panel-card contract-card"><span class="panel-overline">RESPONSE CONTRACT</span><h3>AI 回覆會保留</h3><ul><li>版位 ID 與順序</li><li>每個區塊的位置與尺寸</li><li>色盤、比例與視覺語氣</li></ul><div class="contract-lock"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="8" width="11" height="8.5" rx="1.5"/><path d="M7 8V5.8a3 3 0 0 1 6 0V8M10 11v2.5"/></svg>AI 只回填內容與研究結果</div></section></aside>
+        </div>
+      </section>
+
+      <footer class="main-footer"><span>FRAME CANVAS <i>·</i> 排好版位，為每一格定義它的 AI 任務。</span><span id="footerSaveText">草稿只存於目前瀏覽器</span></footer>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="importModal" hidden>
+    <section class="import-modal" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
+      <div class="modal-head"><div><span class="panel-overline">FILL YOUR CANVAS</span><h2 id="importModalTitle">匯入 AI 回覆</h2><p>貼上 AI 回傳的 JSON，Frame 會依照版位 ID 把內容放回原位。</p></div><button class="modal-close" id="closeImportModalBtn" type="button" aria-label="關閉">×</button></div>
+      <label class="modal-label" for="aiResponseInput">AI 回覆 JSON</label><textarea id="aiResponseInput" rows="12" placeholder="貼上完整的 frame-canvas JSON 回覆…"></textarea><div class="modal-hint"><span>🔒</span> 只會更新相同 ID 版位的內容，不會更動版型、位置或視覺規範。</div>
+      <div class="modal-actions"><button class="button button-outline" id="pasteClipboardBtn" type="button">從剪貼簿貼上</button><div><button class="button button-outline" id="cancelImportBtn" type="button">取消</button><button class="button button-dark" id="applyResponseBtn" type="button">套用回覆</button></div></div>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"><span class="toast-check">✓</span><span id="toastMessage">已更新</span></div>
+  <script src="./app.js" defer></script>
+</body>
+</html>
